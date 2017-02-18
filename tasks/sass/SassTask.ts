@@ -1,30 +1,43 @@
-import * as gulp from "gulp";
-import {BaseTask} from "../BaseTask";
+import {ITaskOptions, BaseTask} from "../BaseTask";
 import * as gulpSass from "gulp-sass";
-class SassTask extends BaseTask {
+import * as extend from "extend";
+export interface ISassTaskOptions extends ITaskOptions {
+    sass?: any;
+}
+export class SassTask extends BaseTask {
+    //extend from defaults of BaseTask
+    protected static readonly DEFAULTS: ISassTaskOptions = extend(
+        true, {}, BaseTask.DEFAULTS, {
+            compileAll: true,
+            sass: {//see https://github.com/sass/node-sass#outputstyle
+                outputStyle: "expanded",
+                sourceComments: true
+            }
+        }
+    );
+    protected _options: ISassTaskOptions;
+    protected _name = "Sass";
     protected _gulpSass = gulpSass;
 
-    _applyCompilePlugin(stream: any, file) {
-        return stream.pipe(this._gulpSass());
-        //return this._vfs.src(this._files)
-        //           .pipe(debug({title:"Files"}))
-        //           .pipe(filter(["**"].concat(this._toExclude)))
-        //           .pipe(debug({title:"Filtered"}))
-        //           .pipe(gulpSass())
-        //           .pipe(debug({title:"Sass"}))
-        //           .pipe(this._vfs.dest(this._options.dest));
+    constructor(options: ISassTaskOptions) {
+        super(options);
+    }
+
+    protected _applyCompilePlugin(stream: any, file) {
+        return stream.pipe(this._gulpSass(this._options.sass));
+    }
+
+    protected _getDefaults(): any {
+        return SassTask.DEFAULTS;
+    }
+
+    public static registerTasks(gulp, sassTask?: SassTask) {
+        sassTask = sassTask || new SassTask(
+                {
+                    files: "**/*.scss",
+                    shutup: SassTask.SHUT_UP.success
+                }
+            );
+        super.registerTasks(gulp, sassTask);
     }
 }
-gulp.task(
-    "sass", function () {
-        return new SassTask(
-            {
-                files: "**/*.scss",
-                notify: {
-                    success: "Sass compiled",
-                    error: "Sass failed"
-                }
-            }
-        ).watch();
-    }
-);
