@@ -14,12 +14,12 @@ class SassTask extends BaseTask_1.BaseTask {
     _getDefaults() {
         return SassTask.DEFAULTS;
     }
-    static registerTasks(gulp, sassTask) {
-        sassTask = sassTask || new SassTask({
+    static registerTasks(gulp, taskInstance) {
+        taskInstance = taskInstance || new SassTask({
             files: "**/*.scss",
             shutup: SassTask.SHUT_UP.success
         });
-        super.registerTasks(gulp, sassTask);
+        super.registerTasks(gulp, taskInstance);
     }
 }
 //extend from defaults of BaseTask

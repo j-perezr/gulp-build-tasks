@@ -97,14 +97,22 @@ class BaseTask {
      */
     _process(params) {
         let stream = this._vfs.src(params.filesToProcess)
-            .pipe(this._options.shutup !== BaseTask.SHUT_UP.always ? this._gulpPlumber({ errorHandler: this._notifyError() }) : this._gutil.noop()) //notifyError generates the config
-            .pipe(this._options.verbose ? this._gulpDebug({ title: this._getLogMessage("Files") }) : this._gutil.noop())
+            .pipe(this._options.shutup !== BaseTask.SHUT_UP.always
+            ? this._gulpPlumber({ errorHandler: this._notifyError() })
+            : this._gutil.noop()) //notifyError generates the config
+            .pipe(this._options.verbose
+            ? this._gulpDebug({ title: this._getLogMessage("Files") })
+            : this._gutil.noop())
             .pipe(this._gulpFilter(["**"].concat(this._toExclude)))
-            .pipe(this._options.verbose ? this._gulpDebug({ title: this._getLogMessage("Files after exclude") }) : this._gutil.noop())
+            .pipe(this._options.verbose
+            ? this._gulpDebug({ title: this._getLogMessage("Files after exclude") })
+            : this._gutil.noop())
             .pipe(this._gulpSourcemaps.init());
         return this._applyCompilePlugin(stream, params)
             .pipe(this._gulpDebug({ title: this._getLogMessage("Output") }))
-            .pipe(this._options.shutup != BaseTask.SHUT_UP.always && this._options.shutup != BaseTask.SHUT_UP.success ? this._notify() : this._gutil.noop())
+            .pipe(this._options.shutup != BaseTask.SHUT_UP.always && this._options.shutup != BaseTask.SHUT_UP.success
+            ? this._notify()
+            : this._gutil.noop())
             .pipe(this._vfs.dest(this._options.dest.path, this._options.dest.options));
     }
     /**
@@ -179,10 +187,14 @@ class BaseTask {
             result.unshift("!" + this._path.join("node_modules", "**"));
         }
         if (!!this._options.excludeBower) {
-            result.unshift("!" + this._path.join(this._options.excludeBower == true ? "bower_components" : this._options.excludeBower, "**"));
+            result.unshift("!" + this._path.join(this._options.excludeBower == true
+                ? "bower_components"
+                : this._options.excludeBower, "**"));
         }
         if (!!this._options.excludeJSPM) {
-            result.unshift("!" + this._path.join(this._options.excludeJSPM == true ? "jspm_packages" : this._options.excludeJSPM, "**"));
+            result.unshift("!" + this._path.join(this._options.excludeJSPM == true
+                ? "jspm_packages"
+                : this._options.excludeJSPM, "**"));
         }
         return result;
     }
@@ -204,7 +216,7 @@ class BaseTask {
      * @returns {any}
      */
     watch() {
-        this._gutil.log(this._getLogMessage("Watching for changes"));
+        this._gutil.log(this._getLogMessage("Waiting for changes"));
         return this._gulpWatch(this._files, this._options.watch, this._onFileChange.bind(this));
     }
     /**

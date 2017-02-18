@@ -1,2 +1,2 @@
 const gulp = require("gulp");
-gulp.task("default", ["sass"]);
+gulp.task("default", ["pug:watch", "sass:watch"]);

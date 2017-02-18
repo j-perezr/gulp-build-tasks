@@ -340,7 +340,7 @@ export abstract class BaseTask {
      * @returns {any}
      */
     watch() {
-        this._gutil.log(this._getLogMessage("Watching for changes"));
+        this._gutil.log(this._getLogMessage("Waiting for changes"));
         return this._gulpWatch(this._files, this._options.watch, this._onFileChange.bind(this));
     }
 

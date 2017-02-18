@@ -2,14 +2,14 @@ import {ITaskOptions, BaseTask} from "../BaseTask";
 import * as gulpSass from "gulp-sass";
 import * as extend from "extend";
 export interface ISassTaskOptions extends ITaskOptions {
-    sass?: any;
+    sass?: any;//see https://github.com/sass/node-sass#outputstyle
 }
 export class SassTask extends BaseTask {
     //extend from defaults of BaseTask
     protected static readonly DEFAULTS: ISassTaskOptions = extend(
         true, {}, BaseTask.DEFAULTS, {
             compileAll: true,
-            sass: {//see https://github.com/sass/node-sass#outputstyle
+            sass: {
                 outputStyle: "expanded",
                 sourceComments: true
             }
@@ -31,13 +31,13 @@ export class SassTask extends BaseTask {
         return SassTask.DEFAULTS;
     }
 
-    public static registerTasks(gulp, sassTask?: SassTask) {
-        sassTask = sassTask || new SassTask(
+    public static registerTasks(gulp, taskInstance?: SassTask) {
+        taskInstance = taskInstance || new SassTask(
                 {
                     files: "**/*.scss",
                     shutup: SassTask.SHUT_UP.success
                 }
             );
-        super.registerTasks(gulp, sassTask);
+        super.registerTasks(gulp, taskInstance);
     }
 }
