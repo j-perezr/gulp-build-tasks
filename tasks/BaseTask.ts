@@ -24,12 +24,22 @@ export interface ITaskDestOptions {
     path: string;
     options?: any;//show https://github.com/gulpjs/vinyl-fs#destfolder-options
 }
+export interface INotifyOptions {
+    title?: string;
+    message?: string;
+    shutUp?: boolean;
+    timeout?: number;
+    sound?: boolean;
+    wait?: boolean;
+    onLast?: boolean;
+    icon?: string;
+}
 /**
  * Options for gulp-notify
  */
-export interface INotifyOptions {
-    message: string;
-    onLast?: boolean;
+export interface ITaskNotifyOptions {
+    success?: INotifyOptions,
+    error?: INotifyOptions
 }
 export interface ITaskOptions {
     files: string | string[],//glob to watch
@@ -43,7 +53,7 @@ export interface ITaskOptions {
     excludeBower?: boolean | string;//exclude bower from watch, if is a string, it will be used as path
     excludeJSPM?: boolean | string;//exclude jspm from watch, if is a string, it will be used as path
     verbose?: boolean;//log all
-    shutup?: SHUT_UP;//config the notifications with gulp-notify
+    notify?: ITaskNotifyOptions;//config the notifications with gulp-notify
 }
 /**
  * Options for process
@@ -58,17 +68,11 @@ export enum SOURCEMAPS{
     inline//sourcemaps inline
     //also could be a string, it is a string, will be used as a path to write the sourcepas
 }
-export enum SHUT_UP{
-    noplease,// :)
-    always,//don't notify anything
-    success//don't notify success but notify errors
-}
 /**
  * A abstract class to create task for process files in a easy way
  */
 export abstract class BaseTask {
     public static readonly SOURCEMAPS = SOURCEMAPS;
-    public static readonly SHUT_UP = SHUT_UP;
     protected abstract _name: string;//the name of the task. Will be used in notify and log and to register the tasks in gulp
     protected static readonly DEFAULTS: ITaskOptions = {
         exclude: [],
@@ -84,7 +88,19 @@ export abstract class BaseTask {
         excludeNode: true,
         excludeBower: true,
         excludeJSPM: true,
-        verbose: false
+        verbose: false,
+        notify: {
+            success: {
+                timeout: 2000,
+                sound: false,
+                onLast: true
+            },
+            error: {
+                timeout: 5000,
+                sound: true,
+                onLast: true
+            }
+        }
     };
     protected _gulpSourcemaps = gulpSourcemaps;
     protected _gutil = gutil;
@@ -102,6 +118,7 @@ export abstract class BaseTask {
     protected _toExclude;
     protected _files: string[];
     protected _logDebugTitle: string;
+
     constructor(options: ITaskOptions) {
         this._options = this._resolveOptions(options);
         this._files = this._resolveFiles();
@@ -163,11 +180,7 @@ export abstract class BaseTask {
     protected _process(params: IProcessParams) {
         let stream = this._vfs.src(params.filesToProcess)
         //catch errors
-                         .pipe(
-                             this._options.shutup !== BaseTask.SHUT_UP.always
-                                 ? this._gulpPlumber({errorHandler: this._notifyError()})
-                                 : this._gutil.noop()
-                         )//notifyError generates the config
+                         .pipe(this._gulpPlumber({errorHandler: this._notifyError()}))//notifyError generates the config
                          //log src files if verbose
                          .pipe(
                              this._options.verbose
@@ -186,11 +199,7 @@ export abstract class BaseTask {
         return this._applyCompilePlugin(stream, params)
                    //log output result
                    .pipe(this._gulpDebug({title: this._getLogMessage("Output")}))
-                   .pipe(
-                       this._options.shutup != BaseTask.SHUT_UP.always && this._options.shutup != BaseTask.SHUT_UP.success
-                           ? this._notify()
-                           : this._gutil.noop()
-                   )
+                   .pipe(this._notify())
                    //write files
                    .pipe(
                        this._vfs.dest(
@@ -198,7 +207,6 @@ export abstract class BaseTask {
                            (<ITaskDestOptions>this._options.dest).options
                        )
                    );
-
     }
 
     /**
@@ -223,12 +231,13 @@ export abstract class BaseTask {
      * @private
      */
     protected _notify() {
-        return this._gulpNotify(
-            {
-                title: this._name,
-                message: "Success"
-            }
-        );
+        if(this._options.notify.success.shutUp != true) {
+            this._options.notify.success.title = this._name;
+            this._options.notify.success.message = "Success";
+            return this._gulpNotify(this._options.notify.success);
+        }else{
+            return this._gutil.noop();
+        }
     }
 
     /**
@@ -237,12 +246,13 @@ export abstract class BaseTask {
      * @private
      */
     protected _notifyError() {
-        return this._gulpNotify.onError(
-            {
-                title: this._name,
-                message: "Error: <%= error.message %>"
-            }
-        );
+        if(this._options.notify.error.shutUp != true) {
+            this._options.notify.error.title = this._name;
+            this._options.notify.error.message = "Error: <%= error.message %>";
+            return this._gulpNotify.onError(this._options.notify.error);
+        }else{
+            return this._gutil.noop();
+        }
     }
 
     /**

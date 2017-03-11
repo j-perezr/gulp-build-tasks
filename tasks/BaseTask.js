@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const gulp = require("gulp");
 const extend = require("extend");
 const path = require("path");
@@ -18,12 +19,6 @@ var SOURCEMAPS;
     SOURCEMAPS[SOURCEMAPS["inline"] = 2] = "inline"; //sourcemaps inline
     //also could be a string, it is a string, will be used as a path to write the sourcepas
 })(SOURCEMAPS = exports.SOURCEMAPS || (exports.SOURCEMAPS = {}));
-var SHUT_UP;
-(function (SHUT_UP) {
-    SHUT_UP[SHUT_UP["noplease"] = 0] = "noplease";
-    SHUT_UP[SHUT_UP["always"] = 1] = "always";
-    SHUT_UP[SHUT_UP["success"] = 2] = "success"; //don't notify success but notify errors
-})(SHUT_UP = exports.SHUT_UP || (exports.SHUT_UP = {}));
 /**
  * A abstract class to create task for process files in a easy way
  */
@@ -97,9 +92,7 @@ class BaseTask {
      */
     _process(params) {
         let stream = this._vfs.src(params.filesToProcess)
-            .pipe(this._options.shutup !== BaseTask.SHUT_UP.always
-            ? this._gulpPlumber({ errorHandler: this._notifyError() })
-            : this._gutil.noop()) //notifyError generates the config
+            .pipe(this._gulpPlumber({ errorHandler: this._notifyError() })) //notifyError generates the config
             .pipe(this._options.verbose
             ? this._gulpDebug({ title: this._getLogMessage("Files") })
             : this._gutil.noop())
@@ -110,9 +103,7 @@ class BaseTask {
             .pipe(this._gulpSourcemaps.init());
         return this._applyCompilePlugin(stream, params)
             .pipe(this._gulpDebug({ title: this._getLogMessage("Output") }))
-            .pipe(this._options.shutup != BaseTask.SHUT_UP.always && this._options.shutup != BaseTask.SHUT_UP.success
-            ? this._notify()
-            : this._gutil.noop())
+            .pipe(this._notify())
             .pipe(this._vfs.dest(this._options.dest.path, this._options.dest.options));
     }
     /**
@@ -136,10 +127,14 @@ class BaseTask {
      * @private
      */
     _notify() {
-        return this._gulpNotify({
-            title: this._name,
-            message: "Success"
-        });
+        if (this._options.notify.success.shutUp != true) {
+            this._options.notify.success.title = this._name;
+            this._options.notify.success.message = "Success";
+            return this._gulpNotify(this._options.notify.success);
+        }
+        else {
+            return this._gutil.noop();
+        }
     }
     /**
      * Create the notify options for an error
@@ -147,10 +142,14 @@ class BaseTask {
      * @private
      */
     _notifyError() {
-        return this._gulpNotify.onError({
-            title: this._name,
-            message: "Error: <%= error.message %>"
-        });
+        if (this._options.notify.error.shutUp != true) {
+            this._options.notify.error.title = this._name;
+            this._options.notify.error.message = "Error: <%= error.message %>";
+            return this._gulpNotify.onError(this._options.notify.error);
+        }
+        else {
+            return this._gutil.noop();
+        }
     }
     /**
      * Resolve the path of the files to watch prepending the src
@@ -246,7 +245,6 @@ class BaseTask {
     ;
 }
 BaseTask.SOURCEMAPS = SOURCEMAPS;
-BaseTask.SHUT_UP = SHUT_UP;
 BaseTask.DEFAULTS = {
     exclude: [],
     files: "",
@@ -261,7 +259,19 @@ BaseTask.DEFAULTS = {
     excludeNode: true,
     excludeBower: true,
     excludeJSPM: true,
-    verbose: false
+    verbose: false,
+    notify: {
+        success: {
+            timeout: 2000,
+            sound: false,
+            onLast: true
+        },
+        error: {
+            timeout: 5000,
+            sound: true,
+            onLast: true
+        }
+    }
 };
 exports.BaseTask = BaseTask;
 //# sourceMappingURL=BaseTask.js.map

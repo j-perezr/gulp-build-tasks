@@ -21,6 +21,8 @@ export class SassTask extends BaseTask {
 
     constructor(options: ISassTaskOptions) {
         super(options);
+        this._options.notify.success.icon = this._path.resolve(__dirname,"assets/notify.png");
+        this._options.notify.error.icon = this._path.resolve(__dirname,"assets/notify.png");
     }
 
     protected _applyCompilePlugin(stream: any, file) {
@@ -34,8 +36,7 @@ export class SassTask extends BaseTask {
     public static registerTasks(gulp, taskInstance?: SassTask) {
         taskInstance = taskInstance || new SassTask(
                 {
-                    files: "**/*.scss",
-                    shutup: SassTask.SHUT_UP.success
+                    files: "**/*.scss"
                 }
             );
         super.registerTasks(gulp, taskInstance);

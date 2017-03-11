@@ -21,6 +21,8 @@ export class PugTask extends BaseTask {
 
     constructor(options: IPugTaskOptions) {
         super(options);
+        this._options.notify.success.icon = this._path.resolve(__dirname,"assets/notify.png");
+        this._options.notify.error.icon = this._path.resolve(__dirname,"assets/notify.png");
     }
 
     protected _filterPartials(file) {
@@ -38,8 +40,7 @@ export class PugTask extends BaseTask {
     public static registerTasks(gulp, taskInstance?: PugTask) {
         taskInstance = taskInstance || new PugTask(
                 {
-                    files: "**/*.pug",
-                    shutup: PugTask.SHUT_UP.success
+                    files: "**/*.pug"
                 }
             );
         super.registerTasks(gulp, taskInstance);

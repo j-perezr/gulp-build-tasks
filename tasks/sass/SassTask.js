@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const BaseTask_1 = require("../BaseTask");
 const gulpSass = require("gulp-sass");
 const extend = require("extend");
@@ -7,6 +8,8 @@ class SassTask extends BaseTask_1.BaseTask {
         super(options);
         this._name = "Sass";
         this._gulpSass = gulpSass;
+        this._options.notify.success.icon = this._path.resolve(__dirname, "assets/notify.png");
+        this._options.notify.error.icon = this._path.resolve(__dirname, "assets/notify.png");
     }
     _applyCompilePlugin(stream, file) {
         return stream.pipe(this._gulpSass(this._options.sass));
@@ -16,8 +19,7 @@ class SassTask extends BaseTask_1.BaseTask {
     }
     static registerTasks(gulp, taskInstance) {
         taskInstance = taskInstance || new SassTask({
-            files: "**/*.scss",
-            shutup: SassTask.SHUT_UP.success
+            files: "**/*.scss"
         });
         super.registerTasks(gulp, taskInstance);
     }
