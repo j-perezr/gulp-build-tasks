@@ -36,9 +36,9 @@ class BaseTask {
         this._path = path;
         this._extend = extend;
         this._gulpWatch = watch;
-        this._options = this._resolveOptions(options);
-        this._files = this._resolveFiles();
-        this._toExclude = this._resolveExcludeFiles();
+        this._options = this._joinOptions(options);
+        this._files = this._joinFiles();
+        this._toExclude = this._joinExcludeFiles();
     }
     /**
      * Get default config.
@@ -50,14 +50,15 @@ class BaseTask {
         return BaseTask.DEFAULTS;
     }
     /**
-     * Resolve the options to use
+     * join the options to use
      * @param options
      * @returns {any}
      * @private
      */
-    _resolveOptions(options) {
+    _joinOptions(options) {
         //see jquery extend
         let parsed = this._extend(true, {}, this._getDefaults(), options);
+        parsed.watch.name = parsed.watch.name || this._name;
         if (typeof parsed.dest == "string") {
             parsed.dest = {
                 path: parsed.dest,
@@ -152,11 +153,11 @@ class BaseTask {
         }
     }
     /**
-     * Resolve the path of the files to watch prepending the src
+     * join the path of the files to watch prepending the src
      * @returns {Array}
      * @private
      */
-    _resolveFiles() {
+    _joinFiles() {
         let files = this._options.files, result = [], src = this._options.base;
         if (!Array.isArray(files)) {
             files = [files];
@@ -167,14 +168,14 @@ class BaseTask {
         return result;
     }
     /**
-     * Resolve the files to exclude creating a glob.
+     * join the files to exclude creating a glob.
      * Exclude bower if it's configured
      * Exclude node_modules if it's configured
      * Exclude JSPM if it's configured
      * @returns {Array}
      * @private
      */
-    _resolveExcludeFiles() {
+    _joinExcludeFiles() {
         let files = this._options.exclude, result = [], src = this._options.base;
         if (!Array.isArray(files)) {
             files = [files];
@@ -192,7 +193,7 @@ class BaseTask {
         }
         if (!!this._options.excludeJSPM) {
             result.unshift("!" + this._path.join(this._options.excludeJSPM == true
-                ? "jspm_packages"
+                ? "**/jspm_packages"
                 : this._options.excludeJSPM, "**"));
         }
         return result;
@@ -254,7 +255,8 @@ BaseTask.DEFAULTS = {
     sourcemaps: BaseTask.SOURCEMAPS.yes,
     watch: {
         ignoreInitial: true,
-        read: false
+        read: false,
+        base: process.cwd()
     },
     excludeNode: true,
     excludeBower: true,

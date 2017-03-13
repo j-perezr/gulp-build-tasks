@@ -14,8 +14,10 @@ import * as gulpSourcemaps from "gulp-sourcemaps";
  * Options for gulp-watch
  */
 export interface IGulpWatchOptions {
+    name?:string;
     ignoreInitial?: boolean;
     read?: boolean;
+    base?:string;
 }
 /**
  * options for vinyl-fs
@@ -83,7 +85,8 @@ export abstract class BaseTask {
         sourcemaps: BaseTask.SOURCEMAPS.yes,
         watch: {
             ignoreInitial: true,
-            read: false
+            read: false,
+            base:process.cwd()
         },
         excludeNode: true,
         excludeBower: true,
@@ -120,9 +123,9 @@ export abstract class BaseTask {
     protected _logDebugTitle: string;
 
     constructor(options: ITaskOptions) {
-        this._options = this._resolveOptions(options);
-        this._files = this._resolveFiles();
-        this._toExclude = this._resolveExcludeFiles();
+        this._options = this._joinOptions(options);
+        this._files = this._joinFiles();
+        this._toExclude = this._joinExcludeFiles();
     }
 
     /**
@@ -136,14 +139,15 @@ export abstract class BaseTask {
     }
 
     /**
-     * Resolve the options to use
+     * join the options to use
      * @param options
      * @returns {any}
      * @private
      */
-    protected _resolveOptions(options: ITaskOptions) {
+    protected _joinOptions(options: ITaskOptions) {
         //see jquery extend
         let parsed = this._extend(true, {}, this._getDefaults(), options);
+        parsed.watch.name = parsed.watch.name || this._name;
         if (typeof parsed.dest == "string") {
             parsed.dest = {
                 path: parsed.dest,
@@ -270,11 +274,11 @@ export abstract class BaseTask {
     protected abstract _applyCompilePlugin(stream, params: IProcessParams): any;
 
     /**
-     * Resolve the path of the files to watch prepending the src
+     * join the path of the files to watch prepending the src
      * @returns {Array}
      * @private
      */
-    protected _resolveFiles() {
+    protected _joinFiles() {
         let files = this._options.files,
             result = [],
             src = this._options.base;
@@ -288,14 +292,14 @@ export abstract class BaseTask {
     }
 
     /**
-     * Resolve the files to exclude creating a glob.
+     * join the files to exclude creating a glob.
      * Exclude bower if it's configured
      * Exclude node_modules if it's configured
      * Exclude JSPM if it's configured
      * @returns {Array}
      * @private
      */
-    protected _resolveExcludeFiles() {
+    protected _joinExcludeFiles() {
         let files = this._options.exclude,
             result = [],
             src = this._options.base;
@@ -321,7 +325,7 @@ export abstract class BaseTask {
             result.unshift(
                 "!" + this._path.join(
                     this._options.excludeJSPM == true
-                        ? "jspm_packages"
+                        ? "**/jspm_packages"
                         : this._options.excludeJSPM, "**"
                 )
             );

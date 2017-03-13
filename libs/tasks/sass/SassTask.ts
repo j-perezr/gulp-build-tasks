@@ -1,6 +1,8 @@
 import {ITaskOptions, BaseTask} from "../BaseTask";
 import * as gulpSass from "gulp-sass";
 import * as extend from "extend";
+import * as sassJspm from "sass-jspm-importer";
+import {JspmUtils} from "../../JspmUtils";
 export interface ISassTaskOptions extends ITaskOptions {
     sass?: any;//see https://github.com/sass/node-sass#outputstyle
 }
@@ -11,14 +13,17 @@ export class SassTask extends BaseTask {
             compileAll: true,
             sass: {
                 outputStyle: "expanded",
-                sourceComments: true
+                sourceComments: true,
+                errLogToConsole: true,
+                functions: sassJspm.resolve_function(JspmUtils.getInstance().getPath()),
+                importer: sassJspm.importer
             }
         }
     );
     protected _options: ISassTaskOptions;
     protected _name = "Sass";
     protected _gulpSass = gulpSass;
-
+    protected _sassJspm = sassJspm;
     constructor(options: ISassTaskOptions) {
         super(options);
         this._options.notify.success.icon = this._path.resolve(__dirname,"assets/notify.png");
