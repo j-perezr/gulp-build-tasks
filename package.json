@@ -1,13 +1,13 @@
 {
   "name": "@sokka/gulp-build-tasks",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Conjunto de tareas para trabajar con gulp:Sass,Pug,Typescrit",
-  "main": "index.js",
+  "main": "libs/main.js",
   "scripts": {
     "start": "node ./index.js"
   },
   "bin": {
-    "gbt": "./bin/cbt"
+    "gbt": "./bin/cbt.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +17,11 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/jperezruiz/gulp-dev-tasks/issues"
+  },
+  "directories": {
+    "bin": "bin",
+    "lib": "libs",
+    "packages": "jspm_packages"
   },
   "homepage": "https://github.com/jperezruiz/gulp-dev-tasks#readme",
   "dependencies": {
@@ -51,11 +56,13 @@
     "@types/vinyl-fs": "^2.4.0"
   },
   "jspm": {
+    "directories": {
+      "bin": "bin",
+      "lib": "libs"
+    },
     "dependencies": {},
     "devDependencies": {
-      "babel": "npm:babel-core@^5.8.24",
-      "babel-runtime": "npm:babel-runtime@^5.8.24",
-      "core-js": "npm:core-js@^1.1.4"
+      "typescript": "npm:typescript@^2.0.7"
     }
   }
 }

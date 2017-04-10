@@ -1,17 +1,18 @@
-import {ITaskOptions, BaseTask} from "../BaseTask";
+import {ITaskOptions} from "../BaseTask";
 import * as gulpPug from "gulp-pug";
 import * as extend from "extend";
 import * as gulpChange from 'gulp-change';
 import * as jspm from "jspm";
 import * as q from "q";
-export interface IPugTaskOptions extends ITaskOptions {
+import {BaseTranspilerTask, ITranspilerTaskOptions} from "../BaseTranspilerTask";
+export interface IPugTaskOptions extends ITranspilerTaskOptions {
     pug?: any;//see https://pugjs.org/api/reference.html#options
     jspm?:boolean;
 }
-export class PugTask extends BaseTask {
+export class PugTask extends BaseTranspilerTask {
     //extend from defaults of BaseTask
     protected static readonly DEFAULTS: IPugTaskOptions = extend(
-        true, {}, BaseTask.DEFAULTS, {
+        true, {}, BaseTranspilerTask.DEFAULTS, {
             compileAll: true,
             sourcemaps: false,
             pug: {
@@ -31,7 +32,12 @@ export class PugTask extends BaseTask {
     protected _executionFolder = process.cwd().replace(/\\/g,"/");
     protected _jspmAvailable;
     constructor(options: IPugTaskOptions) {
-        super(options);
+        super();
+        this._options = this._joinOptions(options);
+        this._init();
+    }
+    protected _init(){
+        super._init();
         this._options.notify.success.icon = this._path.resolve(__dirname,"assets/notify.png");
         this._options.notify.error.icon = this._path.resolve(__dirname,"assets/notify.png");
         this._checkJSPM();

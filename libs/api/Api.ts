@@ -14,8 +14,8 @@ export class Api{
     constructor (options){
         this._options = this._extend(true,{},Api.DEFAULTS,options);
     }
-    public loadTasks(){
-        this._requireDir(this._path.resolve(__dirname,'..','tasks'), {recurse: true});
+    public loadTasks(from?){
+        this._requireDir(from || this._path.resolve(__dirname,'..','tasks'), {recurse: true});
         return this;
     }
     public run(task="default"){

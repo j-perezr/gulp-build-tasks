@@ -1,16 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const BaseTask_1 = require("../BaseTask");
 const gulpSass = require("gulp-sass");
 const extend = require("extend");
 const sassJspm = require("sass-jspm-importer");
 const JspmUtils_1 = require("../../JspmUtils");
-class SassTask extends BaseTask_1.BaseTask {
+const BaseTranspilerTask_1 = require("../BaseTranspilerTask");
+class SassTask extends BaseTranspilerTask_1.BaseTranspilerTask {
     constructor(options) {
-        super(options);
+        super();
         this._name = "Sass";
         this._gulpSass = gulpSass;
         this._sassJspm = sassJspm;
+        this._options = this._joinOptions(options);
+        this._init();
+    }
+    _init() {
+        super._init();
         this._options.notify.success.icon = this._path.resolve(__dirname, "assets/notify.png");
         this._options.notify.error.icon = this._path.resolve(__dirname, "assets/notify.png");
     }
@@ -28,7 +33,7 @@ class SassTask extends BaseTask_1.BaseTask {
     }
 }
 //extend from defaults of BaseTask
-SassTask.DEFAULTS = extend(true, {}, BaseTask_1.BaseTask.DEFAULTS, {
+SassTask.DEFAULTS = extend(true, {}, BaseTranspilerTask_1.BaseTranspilerTask.DEFAULTS, {
     compileAll: true,
     sass: {
         outputStyle: "expanded",
