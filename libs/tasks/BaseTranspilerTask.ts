@@ -9,12 +9,12 @@ import {
  * Options for gulp-watch
  */
 export interface IGulpWatchOptions {
-    name?:string;
+    name?: string;
     ignoreInitial?: boolean;
     read?: boolean;
-    base?:string;
+    base?: string;
 }
-export interface ITranspilerTaskOptions extends ITaskOptions{
+export interface ITranspilerTaskOptions extends ITaskOptions {
     files: string | string[],//glob to watch
     exclude?: string[],//glob to exclude
     base?: string;//base path
@@ -22,7 +22,7 @@ export interface ITranspilerTaskOptions extends ITaskOptions{
     watch?: IGulpWatchOptions;//watch config. See https://github.com/floatdrop/gulp-watch#options
     compileAll?: boolean;//compile all files in each change.
     sourcemaps?: SOURCEMAPS | string;//config for sourcemaps
-    excludeConfig?:ITaskExcludePackageManagers,
+    excludeConfig?: ITaskExcludePackageManagers,
     verbose?: boolean;//log all
     notify?: ITaskNotifyOptions;//config the notifications with gulp-notify
 }
@@ -30,38 +30,41 @@ export interface ITranspilerTaskOptions extends ITaskOptions{
 /**
  * A abstract class to create task for process files in a easy way
  */
-export abstract class BaseTranspilerTask extends BaseTask{
+export abstract class BaseTranspilerTask extends BaseTask {
     protected abstract _name: string;//the name of the task. Will be used in notify and log and to register the tasks in gulp
     protected static readonly DEFAULTS: ITranspilerTaskOptions = extend(
-        true, {},BaseTask.DEFAULTS,{
-        exclude: [],
-        files: "",
-        dest: ".",
-        compileAll: false,
-        sourcemaps: BaseTranspilerTask.SOURCEMAPS.yes,
-        watch: {
-            ignoreInitial: true,
-            read: false,
-            base:process.cwd()
-        },
-        excludeConfig:{
-            npm:true,
-            bower:true,
-            jspm:true
-        },
-        notify: {
-            success: {
-                timeout: 2000,
-                sound: false,
-                onLast: true
+        true, {}, BaseTask.DEFAULTS, {
+            exclude: [],
+            files: "",
+            dest: {
+                path: "."
             },
-            error: {
-                timeout: 5000,
-                sound: true,
-                onLast: true
+            compileAll: false,
+            sourcemaps: BaseTranspilerTask.SOURCEMAPS.yes,
+            watch: {
+                ignoreInitial: true,
+                read: false,
+                base: process.cwd()
+            },
+            excludeConfig: {
+                npm: true,
+                bower: true,
+                jspm: true
+            },
+            notify: {
+                success: {
+                    timeout: 2000,
+                    sound: false,
+                    onLast: true
+                },
+                error: {
+                    timeout: 5000,
+                    sound: true,
+                    onLast: true
+                }
             }
-        }
-    });
+        });
+    protected _watching;
     protected _gulpSourcemaps = gulpSourcemaps;
     protected _options: ITranspilerTaskOptions;
     protected _toExclude;
@@ -71,10 +74,12 @@ export abstract class BaseTranspilerTask extends BaseTask{
     constructor() {
         super();
     }
-    protected _init(){
+
+    protected _init() {
         this._files = this._joinFiles(this._options.files);
-        this._toExclude = this._joinExcludeFiles(this._options.exclude,this._options.excludeConfig);
+        this._toExclude = this._joinExcludeFiles(this._options.exclude, this._options.excludeConfig);
     }
+
     /**
      * Get default config.
      * @returns Object
@@ -85,7 +90,6 @@ export abstract class BaseTranspilerTask extends BaseTask{
         return BaseTranspilerTask.DEFAULTS;
     }
 
-
     /**
      * Process a file or list of files
      * @param params  Data for the process
@@ -93,8 +97,15 @@ export abstract class BaseTranspilerTask extends BaseTask{
      * @private
      */
     protected _process(params: IProcessParams) {
-        let stream = super._process(params);
-        stream.pipe(this._gulpFilter(["**"].concat(this._toExclude)))
+        let stream = this._vfs.src(params.filesToProcess)
+                         .pipe(this._gulpPlumber({errorHandler: this._gulpNotifyError()}))//notifyError
+                         //log src files if verbose
+                         .pipe(
+                             this._options.verbose
+                                 ? this._gulpDebug({title: this._getLogMessage("Files")})
+                                 : this._gutil.noop()
+                         )
+                         .pipe(this._gulpFilter(["**"].concat(this._toExclude)))
                          //log result after apply filter if verbose
                          .pipe(
                              this._options.verbose
@@ -149,6 +160,7 @@ export abstract class BaseTranspilerTask extends BaseTask{
      * @returns {any}
      */
     watch() {
+        this._watching = true;
         this._gutil.log(this._getLogMessage("Waiting for changes"));
         return this._gulpWatch(this._files, this._options.watch, this._onFileChange.bind(this));
     }
@@ -164,16 +176,18 @@ export abstract class BaseTranspilerTask extends BaseTask{
             }
         );
     }
-    run(){
+
+    run() {
         this.build();
         this.watch();
     }
+
     /**
      * Register the tasks
      * @param gulp
      * @param task
      */
-    static registerTasks(gulp, options:IRegisterTaskOptions) {
+    static registerTasks(gulp, options: IRegisterTaskOptions) {
         let task = options.taskInstance || new options.taskClass();
         let name = options.taskClass.NAME;
         gulp.task(

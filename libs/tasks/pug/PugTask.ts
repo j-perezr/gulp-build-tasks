@@ -97,7 +97,7 @@ export class PugTask extends BaseTranspilerTask {
 
     protected _applyCompilePlugin(stream: any, file) {
         return stream.pipe(
-            this._options.jspm != false
+            this._options.jspm != false || this._jspmAvailable == true
                 ? this._gulpChange(this._resolveJSPM.bind(this))
                 : this._gutil.noop()
         ).pipe(

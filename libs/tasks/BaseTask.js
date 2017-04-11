@@ -64,19 +64,6 @@ class BaseTask {
         return parsed;
     }
     /**
-     * Process a file or list of files
-     * @param params  Data for the process
-     * @returns The stream for gulp
-     * @private
-     */
-    _process(params) {
-        return this._vfs.src(params.filesToProcess)
-            .pipe(this._gulpPlumber({ errorHandler: this._gulpNotifyError() })) //notifyError generates the config
-            .pipe(this._options.verbose
-            ? this._gulpDebug({ title: this._getLogMessage("Files") })
-            : this._gutil.noop());
-    }
-    /**
      * Get the prefix for logs
      * @param text Text to include after the prefix
      * @returns {string}
@@ -155,7 +142,7 @@ class BaseTask {
             result.push(this._path.join("!", src, file));
         }
         if (exclude.npm == true) {
-            result.unshift("!" + this._path.join("node_modules", "**"));
+            result.unshift("!" + this._path.join("**", "node_modules", "**"));
         }
         if (exclude.bower) {
             result.unshift("!" + this._path.join("**", "bower_components", "**"));

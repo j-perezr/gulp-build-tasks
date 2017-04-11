@@ -53,6 +53,7 @@ export class Logger{
         }
         if(this._title != undefined){
             messages.unshift(title);
+            title= this._title;
         }
         if(typeof messages == "object"){
             try {
