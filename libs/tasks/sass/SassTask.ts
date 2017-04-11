@@ -1,4 +1,4 @@
-import {ITaskOptions} from "../BaseTask";
+import {IRegisterTaskOptions, ITaskOptions} from "../BaseTask";
 import * as gulpSass from "gulp-sass";
 import * as extend from "extend";
 import * as sassJspm from "sass-jspm-importer";
@@ -8,6 +8,7 @@ export interface ISassTaskOptions extends ITranspilerTaskOptions {
     sass?: any;//see https://github.com/sass/node-sass#outputstyle
 }
 export class SassTask extends BaseTranspilerTask {
+    public static readonly NAME = "sass";
     //extend from defaults of BaseTask
     protected static readonly DEFAULTS: ISassTaskOptions = extend(
         true, {}, BaseTranspilerTask.DEFAULTS, {
@@ -41,14 +42,5 @@ export class SassTask extends BaseTranspilerTask {
 
     protected _getDefaults(): any {
         return SassTask.DEFAULTS;
-    }
-
-    public static registerTasks(gulp, taskInstance?: SassTask) {
-        taskInstance = taskInstance || new SassTask(
-                {
-                    files: "**/*.scss"
-                }
-            );
-        super.registerTasks(gulp, taskInstance);
     }
 }

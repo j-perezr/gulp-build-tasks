@@ -9,6 +9,7 @@ import * as gulpDebug from "gulp-debug";
 import * as gulpNotify from "gulp-notify";
 import * as gulpPlumber from "gulp-plumber";
 import * as gutil from "gulp-util";
+import {Logger} from "../Logger";
 /**
  * Options for process
  */
@@ -25,6 +26,11 @@ export interface ITaskExcludePackageManagers{
     bower?:boolean;
     npm?:boolean;
     jspm?:boolean;
+}
+
+export interface IRegisterTaskOptions{
+    taskClass:any;
+    taskInstance?:BaseTask;
 }
 /**
  * options for vinyl-fs
@@ -66,10 +72,10 @@ export enum SOURCEMAPS{
  */
 export abstract class BaseTask {
     public static readonly SOURCEMAPS = SOURCEMAPS;
+    public static readonly NAME:String = "";
     protected abstract _name: string;//the name of the task. Will be used in notify and log and to register the tasks in gulp
     protected static readonly DEFAULTS: ITaskOptions = {
-        base: ".",
-        verbose: false
+        base: "."
     };
     protected _gutil = gutil;
     protected _gulpPlumber = gulpPlumber;
@@ -84,7 +90,7 @@ export abstract class BaseTask {
     protected _gulpWatch = watch;
     protected _options: ITaskOptions;
     protected _logDebugTitle: string;
-
+    protected _logger = Logger.getInstance();
     constructor() {
     }
     /**
@@ -118,13 +124,13 @@ export abstract class BaseTask {
     protected _process(params: IProcessParams) {
         return this._vfs.src(params.filesToProcess)
         //catch errors
-                         .pipe(this._gulpPlumber({errorHandler: this._gulpNotifyError()}))//notifyError generates the config
-                         //log src files if verbose
-                         .pipe(
-                             this._options.verbose
-                                 ? this._gulpDebug({title: this._getLogMessage("Files")})
-                                 : this._gutil.noop()
-                         );
+         .pipe(this._gulpPlumber({errorHandler: this._gulpNotifyError()}))//notifyError generates the config
+         //log src files if verbose
+         .pipe(
+             this._options.verbose
+                 ? this._gulpDebug({title: this._getLogMessage("Files")})
+                 : this._gutil.noop()
+         );
     }
 
     /**
@@ -218,14 +224,15 @@ export abstract class BaseTask {
         }
         return result;
     }
-    public abstract run();
+    public abstract run(cb?:Function);
     /**
      * Register the tasks
      * @param gulp
      * @param task
      */
-    static registerTasks(gulp, task: BaseTask) {
-        let name = task._name.toLowerCase();
+    static registerTasks(gulp, options:IRegisterTaskOptions) {
+        let task = options.taskInstance ? options.taskInstance : new options.taskClass;
+        let name = options.taskClass.NAME;
         gulp.task(
             `${name}`, function () {
                 return task.run();

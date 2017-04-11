@@ -2,5 +2,6 @@
  * @license
  * Copyright Davinchi. All Rights Reserved.
  */
-export {Api} from "./api/Api";
+export {GBTApi} from "./api/GBTApi";
 export * from "./tasks/tasks";
+export * from "./Logger";

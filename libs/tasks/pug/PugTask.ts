@@ -1,4 +1,4 @@
-import {ITaskOptions} from "../BaseTask";
+import {IRegisterTaskOptions, ITaskOptions} from "../BaseTask";
 import * as gulpPug from "gulp-pug";
 import * as extend from "extend";
 import * as gulpChange from 'gulp-change';
@@ -10,6 +10,7 @@ export interface IPugTaskOptions extends ITranspilerTaskOptions {
     jspm?:boolean;
 }
 export class PugTask extends BaseTranspilerTask {
+    public static readonly NAME = "pug";
     //extend from defaults of BaseTask
     protected static readonly DEFAULTS: IPugTaskOptions = extend(
         true, {}, BaseTranspilerTask.DEFAULTS, {
@@ -109,14 +110,5 @@ export class PugTask extends BaseTranspilerTask {
 
     protected _getDefaults(): any {
         return PugTask.DEFAULTS;
-    }
-
-    public static registerTasks(gulp, taskInstance?: PugTask) {
-        taskInstance = taskInstance || new PugTask(
-                {
-                    files: "**/*.pug"
-                }
-            );
-        super.registerTasks(gulp, taskInstance);
     }
 }

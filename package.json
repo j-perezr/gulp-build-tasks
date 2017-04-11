@@ -3,9 +3,6 @@
   "version": "0.3.1",
   "description": "Conjunto de tareas para trabajar con gulp:Sass,Pug,Typescrit",
   "main": "libs/main.js",
-  "bin": {
-    "gbt": "bin/cbt.js"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jperezruiz/gulp-dev-tasks.git"
@@ -31,6 +28,7 @@
     "gulp-pug": "^3.2.0",
     "gulp-sass": "^3.1.0",
     "gulp-sourcemaps": "^2.4.1",
+    "gulp-sync": "^0.1.4",
     "gulp-util": "^3.0.8",
     "gulp-watch": "^4.3.11",
     "jspm": "^0.16.52",

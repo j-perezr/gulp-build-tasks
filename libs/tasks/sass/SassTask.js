@@ -25,13 +25,8 @@ class SassTask extends BaseTranspilerTask_1.BaseTranspilerTask {
     _getDefaults() {
         return SassTask.DEFAULTS;
     }
-    static registerTasks(gulp, taskInstance) {
-        taskInstance = taskInstance || new SassTask({
-            files: "**/*.scss"
-        });
-        super.registerTasks(gulp, taskInstance);
-    }
 }
+SassTask.NAME = "sass";
 //extend from defaults of BaseTask
 SassTask.DEFAULTS = extend(true, {}, BaseTranspilerTask_1.BaseTranspilerTask.DEFAULTS, {
     compileAll: true,

@@ -11,6 +11,7 @@ const gulpDebug = require("gulp-debug");
 const gulpNotify = require("gulp-notify");
 const gulpPlumber = require("gulp-plumber");
 const gutil = require("gulp-util");
+const Logger_1 = require("../Logger");
 var PACKAGE_MANAGERS;
 (function (PACKAGE_MANAGERS) {
     PACKAGE_MANAGERS[PACKAGE_MANAGERS["bower"] = 0] = "bower";
@@ -40,6 +41,7 @@ class BaseTask {
         this._path = path;
         this._extend = extend;
         this._gulpWatch = watch;
+        this._logger = Logger_1.Logger.getInstance();
     }
     /**
      * Get default config.
@@ -168,8 +170,9 @@ class BaseTask {
      * @param gulp
      * @param task
      */
-    static registerTasks(gulp, task) {
-        let name = task._name.toLowerCase();
+    static registerTasks(gulp, options) {
+        let task = options.taskInstance ? options.taskInstance : new options.taskClass;
+        let name = options.taskClass.NAME;
         gulp.task(`${name}`, function () {
             return task.run();
         });
@@ -177,9 +180,9 @@ class BaseTask {
     ;
 }
 BaseTask.SOURCEMAPS = SOURCEMAPS;
+BaseTask.NAME = "";
 BaseTask.DEFAULTS = {
-    base: ".",
-    verbose: false
+    base: "."
 };
 exports.BaseTask = BaseTask;
 //# sourceMappingURL=BaseTask.js.map

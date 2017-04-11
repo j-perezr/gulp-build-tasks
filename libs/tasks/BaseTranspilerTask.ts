@@ -2,7 +2,7 @@ import * as gulpSourcemaps from "gulp-sourcemaps";
 import * as Vinyl from "vinyl";
 import * as extend from "extend";
 import {
-    BaseTask, IProcessParams, ITaskDestOptions, ITaskExcludePackageManagers, ITaskNotifyOptions,
+    BaseTask, IProcessParams, IRegisterTaskOptions, ITaskDestOptions, ITaskExcludePackageManagers, ITaskNotifyOptions,
     ITaskOptions, SOURCEMAPS
 } from "./BaseTask";
 /**
@@ -173,8 +173,9 @@ export abstract class BaseTranspilerTask extends BaseTask{
      * @param gulp
      * @param task
      */
-    static registerTasks(gulp, task: BaseTranspilerTask) {
-        let name = task._name.toLowerCase();
+    static registerTasks(gulp, options:IRegisterTaskOptions) {
+        let task = options.taskInstance || new options.taskClass();
+        let name = options.taskClass.NAME;
         gulp.task(
             `${name}:build`, function () {
                 return task.build();
