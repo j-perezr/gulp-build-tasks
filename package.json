@@ -1,6 +1,6 @@
 {
   "name": "@sokka/gulp-build-tasks",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Conjunto de tareas para trabajar con gulp:Sass,Pug,Typescrit",
   "main": "libs/main.js",
   "repository": {

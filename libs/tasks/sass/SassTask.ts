@@ -1,7 +1,6 @@
 import {IRegisterTaskOptions, ITaskOptions} from "../BaseTask";
 import * as gulpSass from "gulp-sass";
 import * as extend from "extend";
-import * as sassJspm from "sass-jspm-importer";
 import {JspmUtils} from "../../JspmUtils";
 import {BaseTranspilerTask, ITranspilerTaskOptions} from "../BaseTranspilerTask";
 export interface ISassTaskOptions extends ITranspilerTaskOptions {
@@ -17,21 +16,31 @@ export class SassTask extends BaseTranspilerTask {
                 outputStyle: "expanded",
                 sourceComments: true,
                 errLogToConsole: true,
-                functions: sassJspm.resolve_function(JspmUtils.getInstance().getPath()),
-                importer: sassJspm.importer
             }
         }
     );
     protected _options: ISassTaskOptions;
     protected _name = "Sass";
     protected _gulpSass = gulpSass;
-    protected _sassJspm = sassJspm;
     constructor(options: ISassTaskOptions) {
         super();
         this._options = this._joinOptions(options);
         this._init();
     }
+    protected _initJspmImporter(){
+        if(this._options.sass.functions == undefined && this._options.sass.importer == undefined){
+            try {
+                const sassJspm = require("sass-jspm-importer");
+                this._options.sass.functions = sassJspm.resolve_function(JspmUtils.getInstance().getPath());
+                this._options.sass.importer = sassJspm.importer;
+                this._logger.info(this._name,"JSPM importer initialized");
+            }catch(e){
+                this._logger.warn(this._name,"JSPM is not initialized or installed, JSPM packages will not be processed");
+            }
+        }
+    }
     protected _init(){
+        this._initJspmImporter();
         super._init();
         this._options.notify.success.icon = this._path.resolve(__dirname,"assets/notify.png");
         this._options.notify.error.icon = this._path.resolve(__dirname,"assets/notify.png");

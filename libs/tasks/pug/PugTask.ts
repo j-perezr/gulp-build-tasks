@@ -1,4 +1,3 @@
-import {IRegisterTaskOptions, ITaskOptions} from "../BaseTask";
 import * as gulpPug from "gulp-pug";
 import * as extend from "extend";
 import * as gulpChange from 'gulp-change';
